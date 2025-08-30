@@ -1,0 +1,231 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #121212; /* Even darker background */
+  color: #e0e0e0; /* Light text */
+  line-height: 1.6;
+}
+
+.App {
+  text-align: center;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.App-header {
+  padding: 20px 0;
+  margin-bottom: 40px;
+}
+
+.App-header h1 {
+  color: #61dafb; /* Accent color for heading */
+  font-size: 2.8em;
+  margin: 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.App-main-content {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+/* Results Section Styling */
+.results-section {
+  background-color: #1e1e1e; /* Darker background for results section */
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+  border: 1px solid #333;
+}
+
+.results-section h2 {
+  color: #90caf9; /* Lighter accent for subheadings */
+  font-size: 2em;
+  margin-bottom: 30px;
+}
+
+.results-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr; /* Sentiment on left, Summary on right */
+  gap: 30px;
+  margin-bottom: 40px;
+}
+
+.sentiment-card, .summary-card {
+  background-color: #282828; /* Card background */
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+  border: 1px solid #3a3a3a;
+}
+
+.sentiment-card h3, .summary-card h3, .word-cloud-container h3 {
+  color: #bbdefb; /* Even lighter accent */
+  font-size: 1.5em;
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+.sentiment-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.sentiment-item {
+  background: #3a3a3a; /* Darker background for list items */
+  color: #e0e0e0;
+  padding: 12px 15px;
+  border-radius: 8px;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.2s ease;
+}
+
+.sentiment-item:hover {
+  background-color: #4a4a4a;
+}
+
+.sentiment-item.positive {
+  border-left: 5px solid #4CAF50; /* Green accent */
+}
+
+.sentiment-item.negative {
+  border-left: 5px solid #f44336; /* Red accent */
+}
+
+.sentiment-item.neutral {
+  border-left: 5px solid #ffeb3b; /* Yellow accent */
+  color: #333; /* Darker text for yellow background */
+}
+
+.sentiment-label {
+  font-size: 1.1em;
+}
+
+.sentiment-count {
+  font-size: 1.2em;
+  color: #61dafb;
+}
+
+.summary-text {
+  line-height: 1.8;
+  color: #c0c0c0;
+  text-align: left;
+  background-color: #3a3a3a;
+  border: 1px solid #555;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+  max-height: 300px; /* Limit height for scroll if too long */
+  overflow-y: auto;
+}
+
+.word-cloud-container {
+  background-color: #282828;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+  border: 1px solid #3a3a3a;
+}
+
+.word-cloud-image {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #555;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .results-grid {
+    grid-template-columns: 1fr; /* Stack columns on medium screens */
+  }
+}
+
+@media (max-width: 768px) {
+  .App {
+    padding: 10px;
+  }
+
+  .App-header h1 {
+    font-size: 2.2em;
+  }
+
+  .results-section {
+    padding: 20px;
+  }
+
+  .results-section h2 {
+    font-size: 1.8em;
+  }
+
+  .sentiment-card, .summary-card, .word-cloud-container {
+    padding: 20px;
+  }
+
+  .sentiment-card h3, .summary-card h3, .word-cloud-container h3 {
+    font-size: 1.3em;
+  }
+
+  .sentiment-item {
+    padding: 10px 12px;
+    font-size: 0.9em;
+  }
+
+  .sentiment-label {
+    font-size: 1em;
+  }
+
+  .sentiment-count {
+    font-size: 1.1em;
+  }
+
+  .summary-text {
+    padding: 15px;
+    font-size: 0.95em;
+  }
+}
+
+@media (max-width: 480px) {
+  .App-header h1 {
+    font-size: 1.8em;
+  }
+
+  .results-section {
+    padding: 15px;
+  }
+
+  .results-section h2 {
+    font-size: 1.5em;
+  }
+
+  .sentiment-card, .summary-card, .word-cloud-container {
+    padding: 15px;
+  }
+
+  .sentiment-card h3, .summary-card h3, .word-cloud-container h3 {
+    font-size: 1.1em;
+  }
+
+  .sentiment-item {
+    flex-direction: column; /* Stack sentiment label and count */
+    align-items: flex-start;
+    gap: 5px;
+  }
+
+  .sentiment-count {
+    align-self: flex-end;
+  }
+}
