@@ -26,35 +26,40 @@ import csv # Import csv module for quoting options
 #     nltk.download('punkt_tab')
 
 def read_comments_from_csv(file_path, comment_column_identifier):
-    """Reads comments from a specified column (by name or index) in a CSV file."""
+    """
+    Reads comments from a specified column (by name or index) in a CSV file.
+    Returns a tuple: (processed_comments_list, data_quality_metrics_dict)
+    """
+    data_quality_metrics = {
+        'total_comments_read': 0,
+        'null_comments_count': 0,
+        'non_string_comments_count': 0,
+        'processed_comments_count': 0
+    }
+    
     try:
-        # Try common encodings
         encodings_to_try = ['utf-8', 'latin1', 'cp1252']
         df = None
         for encoding in encodings_to_try:
             try:
-                # Explicitly set separator and quote character
                 df = pd.read_csv(file_path, header=None, encoding=encoding, sep=',', quotechar='"')
-                break # If successful, break the loop
+                break
             except UnicodeDecodeError:
-                continue # Try next encoding
-            except pd.errors.ParserError as pe: # Catch pandas parsing errors
+                continue
+            except pd.errors.ParserError as pe:
                 print(f"ParserError with encoding {encoding}: {pe}")
                 continue
         
         if df is None:
             raise ValueError("Could not decode or parse the CSV file with common encodings (utf-8, latin1, cp1252).")
 
+        comments_series = None
         try:
-            # If identifier is an integer, treat it as a column index
             col_index = int(comment_column_identifier)
             if col_index < 0 or col_index >= df.shape[1]:
                 raise IndexError(f"Column index {col_index} is out of bounds for a CSV with {df.shape[1]} columns (0 to {df.shape[1]-1}).")
-            return df.iloc[:, col_index].dropna().tolist()
+            comments_series = df.iloc[:, col_index]
         except ValueError:
-            # If identifier is not an integer, treat it as a column name
-            # Re-read with header=0 and the successful encoding to check for column name
-            # Use the same parsing parameters
             df_with_header = None
             for encoding_retry in encodings_to_try:
                 try:
@@ -71,28 +76,60 @@ def read_comments_from_csv(file_path, comment_column_identifier):
 
             if comment_column_identifier not in df_with_header.columns:
                 raise ValueError(f"Column '{comment_column_identifier}' not found in the CSV file with or without header.")
-            return df_with_header[comment_column_identifier].dropna().tolist()
+            comments_series = df_with_header[comment_column_identifier]
+
+        data_quality_metrics['total_comments_read'] = len(comments_series)
+        
+        # Count nulls
+        initial_comments = comments_series.tolist()
+        comments_after_dropna = comments_series.dropna()
+        data_quality_metrics['null_comments_count'] = data_quality_metrics['total_comments_read'] - len(comments_after_dropna)
+
+        # Filter out non-string comments and count them
+        processed_comments = []
+        for comment in comments_after_dropna:
+            if isinstance(comment, str):
+                processed_comments.append(comment)
+            else:
+                data_quality_metrics['non_string_comments_count'] += 1
+        
+        data_quality_metrics['processed_comments_count'] = len(processed_comments)
+
+        return processed_comments, data_quality_metrics
 
     except FileNotFoundError:
         print(f"Error: File not found at {file_path}")
-        return []
+        return [], data_quality_metrics # Return empty list and default metrics
     except Exception as e:
         print(f"An error occurred while reading the CSV: {e}")
-        return []
+        return [], data_quality_metrics # Return empty list and default metrics
 
 def analyze_sentiment(comments):
-    """Performs sentiment analysis on a list of comments."""
-    sentiments = []
+    """Performs sentiment analysis on a list of comments, returning categorical and numerical sentiment."""
+    results = []
     for comment in comments:
         analysis = TextBlob(comment)
-        # Classify sentiment as positive, negative, or neutral
+        sentiment_category = ''
+        numerical_sentiment = 0 # Default to neutral
+
         if analysis.sentiment.polarity > 0:
-            sentiments.append('Positive')
+            sentiment_category = 'Positive'
+            numerical_sentiment = 1
         elif analysis.sentiment.polarity < 0:
-            sentiments.append('Negative')
+            sentiment_category = 'Negative'
+            numerical_sentiment = -1
         else:
-            sentiments.append('Neutral')
-    return sentiments
+            sentiment_category = 'Neutral'
+            numerical_sentiment = 0
+        
+        results.append({
+            'comment': comment,
+            'sentiment': sentiment_category,
+            'numerical_sentiment': numerical_sentiment,
+            'polarity': analysis.sentiment.polarity, # Also return polarity for potential future use
+            'subjectivity': analysis.sentiment.subjectivity # And subjectivity
+        })
+    return results
 
 import nltk
 import os
@@ -149,3 +186,31 @@ def generate_word_cloud_image(comments):
     # Encode image to base64
     img_base64 = base64.b64encode(img_buffer.getvalue()).decode('utf-8')
     return img_base64
+
+from collections import Counter
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+
+def extract_common_keywords(analysis_results, top_n=10):
+    """
+    Extracts common keywords for each sentiment category.
+    analysis_results: List of dictionaries, each containing 'comment' and 'sentiment'.
+    """
+    positive_comments = " ".join([res['comment'] for res in analysis_results if res['sentiment'] == 'Positive'])
+    negative_comments = " ".join([res['comment'] for res in analysis_results if res['sentiment'] == 'Negative'])
+    neutral_comments = " ".join([res['comment'] for res in analysis_results if res['sentiment'] == 'Neutral'])
+
+    stop_words = set(stopwords.words('english'))
+    
+    def get_keywords(text):
+        words = word_tokenize(text.lower())
+        # Filter out stopwords, non-alphabetic tokens, and single-character tokens
+        filtered_words = [word for word in words if word.isalpha() and word not in stop_words and len(word) > 1]
+        return Counter(filtered_words).most_common(top_n)
+
+    common_keywords = {
+        'Positive': get_keywords(positive_comments),
+        'Negative': get_keywords(negative_comments),
+        'Neutral': get_keywords(neutral_comments)
+    }
+    return common_keywords

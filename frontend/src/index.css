@@ -5,9 +5,23 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  
+  /* Darker blue mat finish background */
+  background: linear-gradient(135deg, #1a2a3a, #2a3a4a); /* Darker blue gradient */
+  min-height: 100vh; /* Ensure it covers the full viewport height */
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+/* Glassmorphism effect base styles */
+.glass-card {
+  background: rgba(255, 255, 255, 0.05); /* Very subtle white background */
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(5px); /* Subtle blur */
+  -webkit-backdrop-filter: blur(5px); /* Safari support */
+  border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border */
 }

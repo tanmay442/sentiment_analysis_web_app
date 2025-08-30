@@ -72,12 +72,100 @@ def analyze_comments():
                 'word_cloud_image': word_cloud_base64
             })
         except Exception as e:
-            # Print the full traceback to the console for debugging
+            from flask import Flask, request, jsonify
+from flask_cors import CORS
+import os
+import nltk
+import tempfile
+import base64
+from io import BytesIO
+import pandas as pd # Import pandas here as it's used for pd.Series
+import traceback # Import traceback module
+
+# Import sentiment analysis functions
+from sentiment_analyzer import read_comments_from_csv, analyze_sentiment, generate_summary, generate_word_cloud_image, extract_common_keywords
+
+app = Flask(__name__)
+CORS(app) # Enable CORS for frontend communication
+
+# Download NLTK data (only needs to be done once when the app starts)
+def download_nltk_data():
+    try:
+        nltk.data.find('corpora/punkt')
+    except LookupError:
+        nltk.download('punkt')
+    try:
+        nltk.data.find('corpora/stopwords')
+    except LookupError:
+        nltk.download('stopwords')
+    try:
+        nltk.data.find('tokenizers/punkt_tab')
+    except LookupError:
+        nltk.download('punkt_tab')
+    print("NLTK data downloaded/checked.")
+
+# Call the download function when the app starts
+download_nltk_data()
+
+@app.route('/analyze', methods=['POST'])
+def analyze_comments():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part in the request'}), 400
+    
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+    
+    comment_column_identifier = request.form.get('comment_column', '5') # Default to column 5
+
+    if file:
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.csv') as tmp_file:
+            file.save(tmp_file.name)
+            temp_file_path = tmp_file.name
+
+        try:
+            # Call modified read_comments_from_csv
+            comments, data_quality_metrics = read_comments_from_csv(temp_file_path, comment_column_identifier)
+
+            if not comments:
+                return jsonify({'error': 'No comments found or unable to read CSV.'}), 400
+
+            # Call modified analyze_sentiment
+            analysis_results = analyze_sentiment(comments)
+
+            # Extract categorical sentiments for counting
+            categorical_sentiments = [res['sentiment'] for res in analysis_results]
+            sentiment_counts = pd.Series(categorical_sentiments).value_counts().to_dict()
+
+            # Extract numerical sentiments for mean/median
+            numerical_sentiments = [res['numerical_sentiment'] for res in analysis_results]
+            sentiment_mean = pd.Series(numerical_sentiments).mean() if numerical_sentiments else 0
+            sentiment_median = pd.Series(numerical_sentiments).median() if numerical_sentiments else 0
+
+            # Generate summary
+            all_comments_text = " ".join(comments)
+            summary = generate_summary(all_comments_text)
+            
+            # Generate word cloud
+            word_cloud_base64 = generate_word_cloud_image(comments)
+
+            # Extract common keywords
+            common_keywords_by_sentiment = extract_common_keywords(analysis_results)
+
+            return jsonify({
+                'sentiment_counts': sentiment_counts,
+                'sentiment_mean': sentiment_mean,
+                'sentiment_median': sentiment_median,
+                'summary': summary,
+                'word_cloud_image': word_cloud_base64,
+                'common_keywords_by_sentiment': common_keywords_by_sentiment,
+                'data_quality_metrics': data_quality_metrics
+            })
+        except Exception as e:
             print("An error occurred during analysis:")
             traceback.print_exc()
             return jsonify({'error': str(e)}), 500
         finally:
-            # Clean up the temporary file
             os.remove(temp_file_path)
 
 if __name__ == '__main__':

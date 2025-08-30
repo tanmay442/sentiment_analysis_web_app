@@ -1,0 +1,147 @@
+.dashboard-container {
+  padding: 20px;
+  color: #e0e0e0; /* Light gray text for dark background */
+}
+
+.App-header {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #e0e0e0;
+}
+
+.App-main-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.results-section {
+  margin-top: 40px;
+}
+
+.results-section h2 {
+  text-align: center;
+  color: #e0e0e0;
+  margin-bottom: 30px;
+}
+
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Keep existing grid for main content */
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.sentiment-card,
+.summary-card,
+.sentiment-stats-card,
+.keywords-card,
+.data-quality-card,
+.word-cloud-container {
+  padding: 20px;
+  border-radius: 16px;
+  /* glass-card styles are applied via index.css */
+  display: flex;
+  flex-direction: column;
+}
+
+.sentiment-card h3,
+.summary-card h3,
+.sentiment-stats-card h3,
+.keywords-card h3,
+.data-quality-card h3,
+.word-cloud-container h3 {
+  color: #e0e0e0;
+  margin-top: 0;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.sentiment-list, .keyword-list {
+  list-style: none;
+  padding: 0;
+}
+
+.sentiment-item, .keyword-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sentiment-item:last-child, .keyword-list li:last-child {
+  border-bottom: none;
+}
+
+.sentiment-label {
+  font-weight: bold;
+}
+
+.sentiment-item.positive .sentiment-label { color: #76c7c0; } /* Light blue-green */
+.sentiment-item.negative .sentiment-label { color: #ff7b7b; } /* Light red */
+.sentiment-item.neutral .sentiment-label { color: #ffd700; } /* Gold */
+
+.summary-text {
+  line-height: 1.6;
+  text-align: justify;
+}
+
+.word-cloud-container {
+  grid-column: 1 / -1; /* Span full width */
+  text-align: center;
+}
+
+.word-cloud-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin-top: 15px;
+}
+
+.chart-container {
+  position: relative;
+  height: 300px;
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.sentiment-stats-card p,
+.data-quality-card p {
+  margin: 5px 0;
+}
+
+.keywords-card h4 {
+  color: #a0a0a0;
+  margin-top: 10px;
+  margin-bottom: 5px;
+}
+
+.full-width-summary-card {
+  margin-bottom: 20px; /* Space below the summary card */
+  padding: 20px;
+  border-radius: 16px;
+  /* glass-card styles are applied via index.css */
+}
+
+.full-width-summary-card h3 {
+  text-align: center;
+  color: #e0e0e0;
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+.stats-and-quality-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* More compact columns */
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+/* Ensure all cards within stats-and-quality-grid have consistent padding */
+.sentiment-stats-card,
+.keywords-card,
+.data-quality-card {
+  padding: 20px;
+  border-radius: 16px;
+  /* glass-card styles are applied via index.css */
+}
